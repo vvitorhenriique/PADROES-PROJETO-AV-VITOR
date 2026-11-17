@@ -1,27 +1,144 @@
 @startuml
-title Casa de Leilões Online - Padrões: Observer, Strategy, Decorator
-interface Interessado { +atualizar(Lote, double) : void }
-class Participante implements Interessado { -nome : String }
-class PainelLeiloeiro implements Interessado { -maiorLance : double; -totalLances : int }
-class Auditor implements Interessado
-interface RegraComissao { +calcular(double) : double }
-class ComissaoArte implements RegraComissao
-class ComissaoVeiculos implements RegraComissao
-class ComissaoImoveis implements RegraComissao
-class ComissaoEletronicos implements RegraComissao
-interface Fatura { +getDescricao() : String; +getCusto() : double }
-class FaturaBase implements Fatura
-abstract class ServicoAdicional implements Fatura
-class SeguroTransporte extends ServicoAdicional
-class CertificadoAutenticidade extends ServicoAdicional
-class EmbalagemEspecial extends ServicoAdicional
-class EntregaExpressa extends ServicoAdicional
-class Lote
-class Lance
+title Casa de Leilões Online - Observer, Strategy e Decorator
+skinparam classAttributeIconSize 0
+
+' ==========================================
+' PADRÃO OBSERVER (Comunicação de Lances)
+' ==========================================
+interface Interessado {
+  + atualizar(lote: Lote, novoValor: double): void
+}
+
+class Participante {
+  - nome: String
+  + atualizar(lote: Lote, novoValor: double): void
+}
+
+class PainelLeiloeiro {
+  - maiorLance: double
+  - totalLances: int
+  + atualizar(lote: Lote, novoValor: double): void
+}
+
+class Auditor {
+  + atualizar(lote: Lote, novoValor: double): void
+}
+
+Interessado <|.. Participante
+Interessado <|.. PainelLeiloeiro
+Interessado <|.. Auditor
+
+
+' ==========================================
+' PADRÃO STRATEGY (Regra de Comissão)
+' ==========================================
+interface RegraComissao {
+  + calcular(valorVenda: double): double
+}
+
+class ComissaoArte {
+  + calcular(valorVenda: double): double
+}
+
+class ComissaoVeiculos {
+  + calcular(valorVenda: double): double
+}
+
+class ComissaoImoveis {
+  + calcular(valorVenda: double): double
+}
+
+class ComissaoEletronicos {
+  + calcular(valorVenda: double): double
+}
+
+RegraComissao <|.. ComissaoArte
+RegraComissao <|.. ComissaoVeiculos
+RegraComissao <|.. ComissaoImoveis
+RegraComissao <|.. ComissaoEletronicos
+
+
+' ==========================================
+' PADRÃO DECORATOR (Serviços Adicionais)
+' ==========================================
+interface Fatura {
+  + getDescricao(): String
+  + getCusto(): double
+}
+
+class FaturaBase {
+  - nomeLote: String
+  - valorVenda: double
+  + getDescricao(): String
+  + getCusto(): double
+}
+
+abstract class ServicoAdicional {
+  # fatura: Fatura
+  + getDescricao(): String
+  + getCusto(): double
+  # getServicoDescricao(): String
+  # getServicoCusto(): double
+}
+
+class SeguroTransporte {
+  # getServicoDescricao(): String
+  # getServicoCusto(): double
+}
+
+class CertificadoAutenticidade {
+  # getServicoDescricao(): String
+  # getServicoCusto(): double
+}
+
+class EmbalagemEspecial {
+  # getServicoDescricao(): String
+  # getServicoCusto(): double
+}
+
+class EntregaExpressa {
+  # getServicoDescricao(): String
+  # getServicoCusto(): double
+}
+
+Fatura <|.. FaturaBase
+Fatura <|.. ServicoAdicional
+ServicoAdicional o-- Fatura : encapsula
+ServicoAdicional <|-- SeguroTransporte
+ServicoAdicional <|-- CertificadoAutenticidade
+ServicoAdicional <|-- EmbalagemEspecial
+ServicoAdicional <|-- EntregaExpressa
+
+
+' ==========================================
+' CLASSES DE DOMÍNIO
+' ==========================================
+class Lote {
+  - nome: String
+  - precoInicial: double
+  - precoReserva: double
+  - lanceAtual: double
+  - aberto: boolean
+  - regraComissao: RegraComissao
+  - interessados: List<Interessado>
+  - historicoLances: List<Lance>
+  + darLance(p: Participante, valor: double): void
+  + acompanhar(i: Interessado): void
+  + removerAcompanhamento(i: Interessado): void
+  + trocarRegraComissao(regra: RegraComissao): void
+  + encerrar(): void
+  + imprimirAcertoVendedor(): void
+}
+
+class Lance {
+  - participante: Participante
+  - valor: double
+  - dataHora: LocalDateTime
+}
+
+' Relacionamentos do Domínio
 Lote o-- "0..*" Lance
 Lote o-- "0..*" Interessado
 Lote --> "1" RegraComissao
-Fatura <|.. FaturaBase
-Fatura <|.. ServicoAdicional
-ServicoAdicional o-- "1" Fatura : encapsula
+
 @enduml
