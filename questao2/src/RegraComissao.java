@@ -1,0 +1,1 @@
+package questao2.src; public interface RegraComissao { double calcular(double valorVenda); }

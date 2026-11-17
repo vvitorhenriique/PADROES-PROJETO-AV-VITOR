@@ -1,0 +1,1 @@
+package questao2.src; public class ComissaoEletronicos implements RegraComissao { public double calcular(double valor){return Math.max(valor*0.12,50.0);} }

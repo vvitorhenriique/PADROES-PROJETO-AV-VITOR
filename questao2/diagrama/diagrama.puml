@@ -1,0 +1,27 @@
+@startuml
+title Casa de Leilões Online - Padrões: Observer, Strategy, Decorator
+interface Interessado { +atualizar(Lote, double) : void }
+class Participante implements Interessado { -nome : String }
+class PainelLeiloeiro implements Interessado { -maiorLance : double; -totalLances : int }
+class Auditor implements Interessado
+interface RegraComissao { +calcular(double) : double }
+class ComissaoArte implements RegraComissao
+class ComissaoVeiculos implements RegraComissao
+class ComissaoImoveis implements RegraComissao
+class ComissaoEletronicos implements RegraComissao
+interface Fatura { +getDescricao() : String; +getCusto() : double }
+class FaturaBase implements Fatura
+abstract class ServicoAdicional implements Fatura
+class SeguroTransporte extends ServicoAdicional
+class CertificadoAutenticidade extends ServicoAdicional
+class EmbalagemEspecial extends ServicoAdicional
+class EntregaExpressa extends ServicoAdicional
+class Lote
+class Lance
+Lote o-- "0..*" Lance
+Lote o-- "0..*" Interessado
+Lote --> "1" RegraComissao
+Fatura <|.. FaturaBase
+Fatura <|.. ServicoAdicional
+ServicoAdicional o-- "1" Fatura : encapsula
+@enduml

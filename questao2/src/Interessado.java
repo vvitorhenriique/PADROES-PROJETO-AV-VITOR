@@ -1,0 +1,1 @@
+package questao2.src; public interface Interessado { void atualizar(Lote lote, double novoValor); }
