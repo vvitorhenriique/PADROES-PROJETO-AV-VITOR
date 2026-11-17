@@ -1,0 +1,88 @@
+@startuml
+title Provisionamento Multinuvem — Abstract Factory + Singleton
+
+interface MaquinaVirtual {
+  +getId() : String
+  +getCustoHora() : double
+}
+interface Armazenamento {
+  +getId() : String
+  +getCustoPorGb() : double
+}
+interface FilaMensagens {
+  +getId() : String
+  +getCustoFixo() : double
+}
+
+class AwsMaquinaVirtual implements MaquinaVirtual
+class AwsArmazenamento implements Armazenamento
+class AwsFilaMensagens implements FilaMensagens
+class AzureMaquinaVirtual implements MaquinaVirtual
+class AzureArmazenamento implements Armazenamento
+class AzureFilaMensagens implements FilaMensagens
+
+interface ProvedorFactory {
+  +criarMaquinaVirtual(int) : MaquinaVirtual
+  +criarArmazenamento(int) : Armazenamento
+  +criarFila(int) : FilaMensagens
+  +getNomeProvedor() : String
+}
+class AwsFactory implements ProvedorFactory
+class AzureFactory implements ProvedorFactory
+
+class MontadorAmbiente {
+  -factory : ProvedorFactory
+  +montar(Solicitacao) : Ambiente
+}
+class Solicitacao {
+  +nome : String
+  +quantidadeVms : int
+  +gbArmazenamento : double
+}
+class Ambiente {
+  +nome : String
+  +provedor : String
+  +regiao : String
+  +custoMensal() : double
+  +resumo() : String
+}
+class Configuracao <<Singleton>> {
+  -instancia : Configuracao
+  -regiao : String
+  -orcamentoMensal : double
+  +getInstancia() : Configuracao
+}
+class RegistroAuditoria
+class Auditoria <<Singleton>> {
+  -instancia : Auditoria
+  -registros : List<RegistroAuditoria>
+  +getInstancia() : Auditoria
+  +registrar(RegistroAuditoria) : void
+  +imprimirHistorico() : void
+}
+class Provisionador
+class Main
+
+MontadorAmbiente --> ProvedorFactory
+ProvedorFactory ..> MaquinaVirtual : cria
+ProvedorFactory ..> Armazenamento : cria
+ProvedorFactory ..> FilaMensagens : cria
+AwsFactory ..> AwsMaquinaVirtual
+AwsFactory ..> AwsArmazenamento
+AwsFactory ..> AwsFilaMensagens
+AzureFactory ..> AzureMaquinaVirtual
+AzureFactory ..> AzureArmazenamento
+AzureFactory ..> AzureFilaMensagens
+MontadorAmbiente --> Ambiente : cria
+MontadorAmbiente ..> Configuracao : usa
+Ambiente --> MaquinaVirtual
+Ambiente --> Armazenamento
+Ambiente --> FilaMensagens
+Provisionador ..> MontadorAmbiente
+Provisionador ..> Configuracao
+Provisionador ..> Auditoria
+Main --> AwsFactory
+Main --> AzureFactory
+Main --> Provisionador
+Main ..> Auditoria
+@enduml
